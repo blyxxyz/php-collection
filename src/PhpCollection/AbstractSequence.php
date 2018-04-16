@@ -33,7 +33,7 @@ use OutOfBoundsException;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class AbstractSequence extends AbstractCollection implements \IteratorAggregate, SequenceInterface
+class AbstractSequence extends AbstractCollection implements \ArrayAccess, \IteratorAggregate, SequenceInterface
 {
     protected $elements;
 
@@ -356,6 +356,30 @@ class AbstractSequence extends AbstractCollection implements \IteratorAggregate,
     public function getIterator()
     {
         return new \ArrayIterator($this->elements);
+    }
+
+    public function offsetExists($offset)
+    {
+        return $this->isDefinedAt($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        if ($offset === null) {
+            // $map[] = $value
+            return $this->add($value);
+        }
+        return $this->update($offset, $value);
+    }
+
+    public function offsetUnset($offset)
+    {
+        $this->remove($offset);
     }
 
     protected function createNew(array $elements)

@@ -18,6 +18,7 @@
 
 namespace PhpCollection;
 
+use OutOfBoundsException;
 use PhpOption\Some;
 use PhpOption\None;
 
@@ -26,7 +27,7 @@ use PhpOption\None;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class AbstractMap extends AbstractCollection implements \IteratorAggregate, MapInterface
+class AbstractMap extends AbstractCollection implements \ArrayAccess, \IteratorAggregate, MapInterface
 {
     protected $elements;
 
@@ -78,7 +79,7 @@ class AbstractMap extends AbstractCollection implements \IteratorAggregate, MapI
 
         return None::create();
     }
-    
+
     public function all()
     {
         return $this->elements;
@@ -295,6 +296,31 @@ class AbstractMap extends AbstractCollection implements \IteratorAggregate, MapI
     public function getIterator()
     {
         return new \ArrayIterator($this->elements);
+    }
+
+    public function offsetExists($offset)
+    {
+        return $this->containsKey($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        // This method should be usable like accessing an array, so don't use ->get(), which returns an Option
+        if (!isset($this->elements[$offset])) {
+            throw new OutOfBoundsException(sprintf('The key "%s" does not exist in this map.', $offset));
+        }
+
+        return $this->elements[$offset];
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        return $this->set($offset, $value);
+    }
+
+    public function offsetUnset($offset)
+    {
+        $this->remove($offset);
     }
 
     protected function createNew(array $elements)

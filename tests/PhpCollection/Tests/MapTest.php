@@ -33,7 +33,7 @@ class MapTest extends \PHPUnit_Framework_TestCase
         $this->map->setAll(array('foo' => 'asdf', 'bar' => array('foo')));
         $this->assertEquals(array('foo' => 'asdf', 'bar' => array('foo'), 'baz' => 'boo'), iterator_to_array($this->map));
     }
-    
+
     public function testAll()
     {
         $this->map->setAll(array('foo' => 'asdf', 'bar' => array('foo')));
@@ -215,6 +215,58 @@ class MapTest extends \PHPUnit_Framework_TestCase
     public function testValues()
     {
         $this->assertEquals(array('bar', 'baz', 'boo'), $this->map->values());
+    }
+
+    public function testOffsetGet()
+    {
+        $this->assertSame('bar', $this->map['foo']);
+        $this->assertSame('boo', $this->map['baz']);
+    }
+
+    /**
+     * @expectedException \OutOfBoundsException
+     * @expectedExceptionMessage The key "foobar" does not exist in this map.
+     */
+    public function testInvalidOffsetGet()
+    {
+        $this->map['foobar'];
+    }
+
+    public function testOffsetSet()
+    {
+        $this->assertFalse(isset($this->map['foobar']));
+        $this->map['foobar'] = 23;
+        $this->assertTrue(isset($this->map['foobar']));
+        $this->assertTrue($this->map->containsKey('foobar'));
+        $this->assertSame(23, $this->map['foobar']);
+
+        $this->assertSame('bar', $this->map['foo']);
+        $this->map['foo'] = 'baz';
+        $this->assertSame('baz', $this->map['foo']);
+    }
+
+    public function testOffsetExists()
+    {
+        $this->assertTrue(isset($this->map['foo']));
+        $this->assertFalse(isset($this->map['foobar']));
+        $this->map->set('foobar', 'baz');
+        $this->assertTrue(isset($this->map['foobar']));
+    }
+
+    public function testOffsetUnset()
+    {
+        $this->assertTrue($this->map->containsKey('foo'));
+        unset($this->map['foo']);
+        $this->assertFalse($this->map->containsKey('foo'));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage The map has no key named "foobar".
+     */
+    public function testInvalidOffsetUnset()
+    {
+        unset($this->map['foobar']);
     }
 
     protected function setUp()

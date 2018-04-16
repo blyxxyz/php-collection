@@ -331,6 +331,38 @@ class SequenceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('c', 'd'), $newSeq->all());
     }
 
+    public function testOffsetGet()
+    {
+        $this->assertSame(0, $this->seq[3]);
+        $this->assertSame($this->b, $this->seq[2]);
+    }
+
+    public function testOffsetSet()
+    {
+        $this->seq[0] = 0;
+        $this->assertSame(0, $this->seq[0]);
+    }
+
+    public function testOffsetSetAdd()
+    {
+        $this->seq[] = 2;
+        $this->assertSame(array(0, $this->a, $this->b, 0, 2), $this->seq->all());
+    }
+
+    public function testOffsetExists()
+    {
+        $this->assertTrue(isset($this->seq[3]));
+        $this->assertFalse(isset($this->seq[9999999]));
+    }
+
+    public function testOffsetUnset()
+    {
+        unset($this->seq[1]);
+        $this->assertEquals(array(0, $this->b, 0), $this->seq->all());
+        unset($this->seq[2]);
+        $this->assertEquals(array(0, $this->b), $this->seq->all());
+    }
+
     protected function setUp()
     {
         $this->seq = new Sequence();
